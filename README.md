@@ -17,6 +17,10 @@ A <b>BepInEx-Partiality Mod Wrapper</b> for Unity Games (this fork is specifical
 4. Run the game once, and then close it.
 5. Done!
 
+### Notes
+
+* When Outward updates, you will need to <b>delete this file:</b> `Outward\BepInEx\plugins\PartialityWrapper\HOOKS-Assembly-Csharp.dll`
+
 ## Adding Partiality Mods
 
 Drag and drop any **Partiality** mod .dll files onto **BepInEx\plugins** folder.
