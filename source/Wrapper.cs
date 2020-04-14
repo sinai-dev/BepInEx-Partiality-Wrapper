@@ -4,28 +4,31 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-
 using BepInEx;
 using BepInEx.Logging;
-
 using HarmonyLib;
-
 using Mono.Cecil;
-
 using MonoMod;
 using MonoMod.RuntimeDetour.HookGen;
-
 using Partiality;
 using Partiality.Modloader;
+
+/*
+ *  Original PartialityWrapper written by Ashnal
+ *  
+ *  Forked by notfood and fixed for BepInEx 5.0 (rewrite)
+ *  
+ *  Re-forked by Sinai (me) for Outward again
+*/
 
 namespace BepInExPartialityWrapper
 {
     [BepInPlugin(ID, NAME, VERSION)]
     public class Wrapper : BaseUnityPlugin
     {
-        const string ID = "github.notfood.BepInExPartialityWrapper";
+        const string ID = "github.sinaioutlander.BepInExPartialityWrapper";
         const string NAME = "Partiality Wrapper";
-        const string VERSION = "2.0";
+        const string VERSION = "2.01";
 
         public Wrapper()
         {
@@ -40,21 +43,25 @@ namespace BepInExPartialityWrapper
             string pathIn = Path.Combine(Paths.ManagedPath, "Assembly-CSharp.dll");
             string pathOut = Path.Combine(Path.GetDirectoryName(Info.Location), "HOOKS-Assembly-CSharp.dll");
 
-            if (File.Exists(pathOut)) {
+            if (File.Exists(pathOut)) 
+            {
                 return;
             }
 
-            using (MonoModder mm = new MonoModder {
+            using (MonoModder mm = new MonoModder 
+            {
                 InputPath = pathIn,
                 OutputPath = pathOut,
                 PublicEverything = true,
                 DependencyDirs = new List<string>() { Paths.ManagedPath, Paths.BepInExAssemblyDirectory },
-            }) {
+            }) 
+            {
                 mm.Read();
                 mm.MapDependencies();
                 mm.Log("[HookGen] Starting HookGenerator");
                 HookGenerator gen = new HookGenerator(mm, Path.GetFileName(pathOut));
-                using (ModuleDefinition mOut = gen.OutputModule) {
+                using (ModuleDefinition mOut = gen.OutputModule) 
+                {
                     gen.HookPrivate = true;
                     gen.Generate();
                     mOut.Write(pathOut);
@@ -84,18 +91,22 @@ namespace BepInExPartialityWrapper
             var loadedMods = PartialityManager.Instance.modManager.loadedMods;
 
             //Load mods from types
-            foreach (Type t in modTypes) {
+            foreach (Type t in modTypes) 
+            {
                 //Don't try to load the base class
-                if (t.Name == "PartialityMod") {
+                if (t.Name == "PartialityMod") 
+                {
                     continue;
                 }
 
-                try {
+                try 
+                {
                     PartialityMod newMod = (PartialityMod) Activator.CreateInstance(t);
 
                     newMod.Init();
 
-                    if (newMod.ModID == "NULL") {
+                    if (newMod.ModID == "NULL") 
+                    {
                         Logger.LogWarning("Mod With NULL id, assigning the file as the ID");
                         newMod.ModID = t.Name;
                     }
@@ -104,23 +115,27 @@ namespace BepInExPartialityWrapper
 
                     Logger.LogInfo("Initialized mod " + newMod.ModID);
 
-                } catch (Exception e) {
+                } 
+                catch (Exception e) 
+                {
                     Logger.LogError("Could not instantiate Partiality Mod of Type: " + t.Name + "\r\n" + e);
                 }
             }
 
             var loadedModsSorted = loadedMods.OrderBy(mod => mod.loadPriority);
 
-            //Call mod load function
-            foreach (PartialityMod pMod in loadedModsSorted) {
-                try {
+            foreach (var pMod in loadedModsSorted)
+            {
+                try
+                {
                     pMod.OnLoad();
                     pMod.OnEnable();
 
-                    Logger.LogInfo("Loaded mod " + pMod.ModID);
-
-                } catch (Exception e) {
-                    Logger.LogError("Could not load Partiality Mod: " + pMod.ModID + "\r\n" + e);
+                    Logger.LogInfo("Loaded and Enabled mod " + pMod.ModID);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogError("Initialization error with mod: " + pMod.ModID + "\r\n" + e);
                 }
             }
         }
@@ -136,16 +151,21 @@ namespace BepInExPartialityWrapper
             List<Type> types = new List<Type>();
             Type pluginType = typeof(T);
 
-            foreach (string dll in Directory.GetFiles(Path.GetFullPath(directory), "*.dll")) {
-                try {
+            foreach (string dll in Directory.GetFiles(Path.GetFullPath(directory), "*.dll")) 
+            {
+                try 
+                {
                     Assembly assembly = Assembly.LoadFile(dll);
 
-                    foreach (Type type in assembly.GetTypes()) {
+                    foreach (Type type in assembly.GetTypes()) 
+                    {
                         if (!type.IsInterface && !type.IsAbstract && type.BaseType == pluginType)
                             types.Add(type);
                     }
-                } catch (BadImageFormatException) { } //unmanaged DLL
-                catch (ReflectionTypeLoadException ex) {
+                } 
+                catch (BadImageFormatException) { } //unmanaged DLL
+                catch (ReflectionTypeLoadException ex) 
+                {
                     Logger.Log(LogLevel.Error, $"Could not load \"{Path.GetFileName(dll)}\" as a plugin!");
                     Logger.Log(LogLevel.Debug, TypeLoadExceptionToString(ex));
                 }
@@ -157,15 +177,21 @@ namespace BepInExPartialityWrapper
         static string TypeLoadExceptionToString(ReflectionTypeLoadException ex)
         {
             StringBuilder sb = new StringBuilder();
-            foreach (Exception exSub in ex.LoaderExceptions) {
+            foreach (Exception exSub in ex.LoaderExceptions) 
+            {
                 sb.AppendLine(exSub.Message);
-                if (exSub is FileNotFoundException exFileNotFound) {
-                    if (!string.IsNullOrEmpty(exFileNotFound.FusionLog)) {
+                if (exSub is FileNotFoundException exFileNotFound) 
+                {
+                    if (!string.IsNullOrEmpty(exFileNotFound.FusionLog)) 
+                    {
                         sb.AppendLine("Fusion Log:");
                         sb.AppendLine(exFileNotFound.FusionLog);
                     }
-                } else if (exSub is FileLoadException exLoad) {
-                    if (!string.IsNullOrEmpty(exLoad.FusionLog)) {
+                } 
+                else if (exSub is FileLoadException exLoad) 
+                {
+                    if (!string.IsNullOrEmpty(exLoad.FusionLog)) 
+                    {
                         sb.AppendLine("Fusion Log:");
                         sb.AppendLine(exLoad.FusionLog);
                     }

@@ -14,11 +14,12 @@
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\package\BepInEx\plugins\PartialityWrapper\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <OutputPath>..\Release\BepInEx\plugins\PartialityWrapper\</OutputPath>
+    <DefineConstants>
+    </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -30,30 +31,37 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="Partiality">
-      <HintPath>references\Partiality.dll</HintPath>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\..\..\Downloads\BepInEx_x64_5.0.1.0\BepInEx\core\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="BepInEx">
-      <HintPath>references\BepInEx.dll</HintPath>
+      <HintPath>..\..\..\..\Downloads\BepInEx_x64_5.0.1.0\BepInEx\core\BepInEx.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Mono.Cecil">
-      <HintPath>packages\Mono.Cecil.0.10.4\lib\net35\Mono.Cecil.dll</HintPath>
+      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\BepInEx\core\Mono.Cecil.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="MonoMod">
-      <HintPath>packages\MonoMod.19.11.5.1\lib\net35\MonoMod.exe</HintPath>
-    </Reference>
-    <Reference Include="MonoMod.RuntimeDetour.HookGen">
-      <HintPath>packages\MonoMod.RuntimeDetour.HookGen.19.11.5.1\lib\net35\MonoMod.RuntimeDetour.HookGen.exe</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>references\UnityEngine.dll</HintPath>
+      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\BepInEx\plugins\MonoMod\MonoMod.exe</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="0Harmony">
-      <HintPath>references\0Harmony.dll</HintPath>
+    <Reference Include="MonoMod.RuntimeDetour.HookGen">
+      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\BepInEx\plugins\MonoMod\MonoMod.RuntimeDetour.HookGen.exe</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Partiality">
+      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\BepInEx\plugins\PartialityWrapper\Partiality.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
