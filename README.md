@@ -3,18 +3,34 @@
 [![Version](https://img.shields.io/badge/BepInEx-5.0-green.svg)](https://github.com/BepInEx/BepInEx)
 [![Version](https://img.shields.io/badge/Partiality-0.1-green.svg)](https://github.com/PartialityModding/Partiality)
 
-Generic **BepInEx** Wrapper for any **Unity games** that rely on **Partiality**.
+A <b>BepInEx-Partiality Mod Wrapper</b> for Unity Games (this fork is specifically targeted at Outward). This allows Partiality mods to run in BepInEx.
+
+## Release
+
+[BepInEx-Partiality-Wrapper Releases](https://github.com/sinaioutlander/BepInEx-Partiality-Wrapper/releases)
 
 ## Installation
 
-Unpack on your game instalation folder, requires **BepInEx +5.0**.
+1. Take the <b>BepInEx 5.0 + PartialityWrapper.zip</b> file and place it in your Outward installation folder.
+2. It should look like `"...Steam\steamapps\common\Outward\BepInEx 5.0 + PartialityWrapper.zip"`
+3. Right-click the file and choose <b>"Extract here</b>"
+4. Run the game once, and then close it.
+5. Done!
 
 ## Adding Partiality Mods
 
-Drag and drop any **Partiality** mods dlls onto **BepInEx/plugins** folder.
+Drag and drop any **Partiality** mod .dll files onto **BepInEx\plugins** folder.
 
-## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+Some mods may use the `Outward\Mods` folder for assets or configuration files. You <b>still need this folder in these cases</b>. Only the actual mod .dll file should be placed in BepInEx\plugins\.
+
+For example for SideLoader, `SideLoader.dll` goes in `Outward\BepInEx\plugins`, but all SL Packs should be in `Outward\Mods\SideLoader\`.
+
+## Credits
+* <b>Ashnal</b> for the original PartialityWrapper
+* <b>notfood</b> for the Bep 5.0 rewrite
+* <b>bbepis</b> for BepInEx
+* <b>Zandra</b> for Partiality
+* <b>0x0ade</b> for MonoMod
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
