@@ -27,7 +27,7 @@ For example for SideLoader, `SideLoader.dll` goes in `Outward\BepInEx\plugins`, 
 * <b>Ashnal</b> for the original PartialityWrapper
 * <b>notfood</b> for the Bep 5.0 rewrite
 * <b>bbepis</b> for BepInEx
-* <b>Zandra<b> for Partiality
+* <b>Zandra</b> for Partiality
 * <b>0x0ade</b> for MonoMod
 
 ## License
