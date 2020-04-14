@@ -5,7 +5,9 @@
 
 A <b>BepInEx-Partiality Mod Wrapper</b> for Unity Games (this fork is specifically targeted at Outward). This allows Partiality mods to run in BepInEx.
 
-The zip release in this repository also includes a release of <b>BepInEx 5.0</b> for convenience. All credit goes to bbepis for BepInEx.
+## Release
+
+[BepInEx-Partiality-Wrapper Releases](https://github.com/sinaioutlander/BepInEx-Partiality-Wrapper/releases)
 
 ## Installation
 
