@@ -1,7 +1,7 @@
 # BepInEx-Partiality-Wrapper
 
 [![Version](https://img.shields.io/badge/BepInEx-5.0-green.svg)](https://github.com/BepInEx/BepInEx)
-[![Version](https://img.shields.io/badge/Partiality-0.1-green.svg)](https://github.com/PartialityModding/Partiality)
+[![Version](https://img.shields.io/badge/Partiality-0.3.1-green.svg)](https://github.com/PartialityModding/Partiality)
 
 A <b>BepInEx-Partiality Mod Wrapper</b> for Unity Games. This allows Partiality mods to run in BepInEx.
 
