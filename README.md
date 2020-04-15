@@ -27,6 +27,10 @@ Install the <b>PartialityWrapper</b>:
 3. Right-click the file and choose <b>"Extract here</b>" to merge with the folder structure.
 4. Done, you can now add Partiality mods.
 
+### Notes
+
+* When Outward updates, you will need to <b>delete this file:</b> `Outward\BepInEx\plugins\PartialityWrapper\HOOKS-Assembly-Csharp.dll`
+
 ## Adding Partiality Mods
 
 Drag and drop any **Partiality** mod .dll files onto **`BepInEx\plugins`** folder.
