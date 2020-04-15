@@ -23,7 +23,7 @@ Install <b>BepInEx</b>: (if you don't have it already)
 
 Install the <b>PartialityWrapper</b>:
 1. Download the <b>BepInEx-Partiality-Wrapper.zip</b> file from the [Releases](https://github.com/sinaioutlander/BepInEx-Partiality-Wrapper/releases) page.
-2. Place the zip in your game installation folder, eg. for Outward: `Outward\BepInEx-Partiality-Wrapper.zip"`
+2. Place the zip in your game installation folder, eg. for Outward: `Outward\BepInEx-Partiality-Wrapper.zip`
 3. Right-click the file and choose <b>"Extract here</b>" to merge with the folder structure.
 4. Done, you can now add Partiality mods.
 
