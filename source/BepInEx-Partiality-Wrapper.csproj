@@ -33,12 +33,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>..\Release\BepInEx\core\0Harmony.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="BepInEx">
-      <HintPath>..\Release\BepInEx\core\BepInEx.dll</HintPath>
+      <HintPath>..\Release\BepInEx_x64_5.0.1.0\core\BepInEx.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Mono.Cecil">
@@ -46,11 +42,19 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="MonoMod">
-      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\BepInEx\plugins\MonoMod\MonoMod.exe</HintPath>
+      <HintPath>packages\MonoMod.19.11.5.1\lib\net35\MonoMod.exe</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="MonoMod.RuntimeDetour">
+      <HintPath>packages\MonoMod.RuntimeDetour.19.11.5.1\lib\net35\MonoMod.RuntimeDetour.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="MonoMod.RuntimeDetour.HookGen">
-      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\BepInEx\plugins\MonoMod\MonoMod.RuntimeDetour.HookGen.exe</HintPath>
+      <HintPath>packages\MonoMod.RuntimeDetour.HookGen.19.11.5.1\lib\net35\MonoMod.RuntimeDetour.HookGen.exe</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="MonoMod.Utils">
+      <HintPath>packages\MonoMod.Utils.19.11.5.1\lib\net35\MonoMod.Utils.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -61,7 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="PartialityMod.cs" />
-    <Compile Include="PartialityWrapper.cs" />
+    <Compile Include="Wrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

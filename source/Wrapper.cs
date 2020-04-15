@@ -104,31 +104,40 @@ namespace Partiality
         {
             List<PartialityMod> instances = new List<PartialityMod>();
 
-            foreach (string dll in Directory.GetFiles(Path.GetFullPath(Paths.PluginPath), "*.dll")) 
+            foreach (string filepath in Directory.GetFiles(Paths.PluginPath, "*.dll")) 
             {
                 try 
                 {
-                    Assembly assembly = Assembly.Load(File.ReadAllBytes(dll));
+                    Assembly assembly = Assembly.Load(File.ReadAllBytes(filepath));
 
-                    foreach (Type type in assembly.GetTypes()) 
+                    foreach (Type type in assembly.GetTypes()
+                        .Where(x => 
+                            x.BaseType == typeof(PartialityMod) &&
+                            !x.IsInterface &&
+                            !x.IsAbstract &&
+                            x.Name != "PartialityMod")) // dont try to load the base class (although would this ever happen?)
                     {
-                        if (!type.IsInterface && !type.IsAbstract && type.BaseType == typeof(PartialityMod) && type.Name != "PartialityMod")
+                        var mod = (PartialityMod)Activator.CreateInstance(type);
+
+                        if (mod.ModID == "NULL")
                         {
-                            var mod = (PartialityMod)Activator.CreateInstance(type);
-                            instances.Add(mod);
-                            Logger.LogInfo("Created instance of mod: " + mod.ModID);
+                            Logger.LogWarning("Mod with 'NULL' ID, assigning the Type as the ID");
+                            mod.ModID = mod.GetType().Name;
                         }
+
+                        instances.Add(mod);
+                        Logger.LogInfo("Created instance of mod: " + mod.ModID);
                     }
                 } 
                 catch (BadImageFormatException) { } // unmanaged DLL
                 catch (ReflectionTypeLoadException ex) 
                 {
-                    Logger.Log(LogLevel.Error, $"Could not load \"{Path.GetFileName(dll)}\" as a plugin!");
+                    Logger.Log(LogLevel.Error, $"Could not load \"{Path.GetFileName(filepath)}\" as a plugin!");
                     Logger.Log(LogLevel.Debug, TypeLoadExceptionToString(ex));
                 }
                 catch (Exception ex)
                 {
-                    Logger.Log(LogLevel.Error, $"Unhandled exception loading \"{Path.GetFileName(dll)}\"!");
+                    Logger.Log(LogLevel.Error, $"Unhandled exception loading \"{Path.GetFileName(filepath)}\"!");
                     Logger.Log(LogLevel.Debug, ex.StackTrace);
                 }
             }
@@ -149,13 +158,6 @@ namespace Partiality
                 try
                 {
                     mod.Init();
-
-                    if (mod.ModID == "NULL")
-                    {
-                        Logger.LogWarning("Mod with 'NULL' ID, assigning the Type as the ID");
-                        mod.ModID = mod.GetType().Name;
-                    }
-
                     mod.OnLoad();
                     mod.OnEnable();
 
