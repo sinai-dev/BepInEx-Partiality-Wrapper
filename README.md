@@ -17,13 +17,13 @@ The HOOKS file included with the release is the current latest one for Outward. 
 
 Install <b>BepInEx</b>: (if you don't have it already)
 1. Download the [latest BepInEx_x64 release](https://github.com/BepInEx/BepInEx/releases).
-2. Place the zip in your game installation folder, so it looks like `...Steam\steamapps\common\{gamename}\BepInEx.zip`.
+2. Place the zip in your game installation folder, eg. for Outward: `Outward\BepInEx.zip`.
 3. Right-click the file and choose <b>"Extract here</b>" to merge with the folder structure.
 4. Run the game once, and then close it.
 
 Install the <b>PartialityWrapper</b>:
-1. Take the <b>BepInEx-Partiality-Wrapper.zip</b> file and place it in your Game installation folder.
-2. It should look like `"...Steam\steamapps\common\{gamename}\BepInEx-Partiality-Wrapper.zip"`
+1. Download the <b>BepInEx-Partiality-Wrapper.zip</b> file from the [Releases]((https://github.com/sinaioutlander/BepInEx-Partiality-Wrapper/releases)) page.
+2. Place the zip in your game installation folder, eg. for Outward: `Outward\BepInEx-Partiality-Wrapper.zip"`
 3. Right-click the file and choose <b>"Extract here</b>" to merge with the folder structure.
 4. Done, you can now add Partiality mods.
 
