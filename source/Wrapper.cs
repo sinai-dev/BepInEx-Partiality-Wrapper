@@ -6,52 +6,70 @@ using System.Reflection;
 using System.Text;
 using BepInEx;
 using BepInEx.Logging;
-using HarmonyLib;
 using Mono.Cecil;
 using MonoMod;
 using MonoMod.RuntimeDetour.HookGen;
-using Partiality;
 using Partiality.Modloader;
 
 /*
- *  Original PartialityWrapper written by Ashnal
+ *  ========= BepInEx-Partiality-Wrapper =========
  *  
- *  Forked by notfood and fixed for BepInEx 5.0 (rewrite)
+ *  This is essentially Partiality packaged as a BepInEx mod.
+ *  It serves as a dummy reference to Partiality.dll, containing only the PartialityMod class, and the loader as a BepInEx plugin.
+ *  It also includes HookGen and will regenerate hooks when it is detected that they are out of date.
  *  
- *  Re-forked by Sinai (me) for Outward again
+ *  This version also has a slightly different way of reading the Partiality assembly files, which would allow compatibility with Reloader.
+ *
+ *  ~~~~~~ Credits: ~~~~~~
+ *  - Zandra: for Partiality
+ *  - Ashnal: wrote original BepInEx-Partiality-Wrapper
+ *  - notfood: rewrote the Wrapper for BepInEx 5.0
+ *  - Sinai (me): bundled Partiality into this mod, and some small changes.
+ *  - Laymain: helped with this version
 */
 
-namespace BepInExPartialityWrapper
+namespace Partiality
 {
     [BepInPlugin(ID, NAME, VERSION)]
     public class Wrapper : BaseUnityPlugin
     {
-        const string ID = "github.sinaioutlander.BepInExPartialityWrapper";
+        const string ID = "com.sinai.PartialityWrapper";
         const string NAME = "Partiality Wrapper";
-        const string VERSION = "2.01";
+        const string VERSION = "2.1";
 
         public Wrapper()
         {
-            GenerateHooks();
-            BootstrapPartiality();
+            // check the HOOKS file
+            CheckHooks();
+
+            // Read and Load PartialityMod types from the plugins folder
             LoadPartialityMods();
         }
 
-        /// <summary>Generates the HOOKS-Assembly-CSharp.dll the same as Partiality</summary>
-        void GenerateHooks()
+        /// <summary>Generates the HOOKS-Assembly-CSharp.dll file, if it needs updating.</summary>
+        void CheckHooks()
         {
-            string pathIn = Path.Combine(Paths.ManagedPath, "Assembly-CSharp.dll");
-            string pathOut = Path.Combine(Path.GetDirectoryName(Info.Location), "HOOKS-Assembly-CSharp.dll");
+            string asmPath = Path.Combine(Paths.ManagedPath, "Assembly-CSharp.dll");
+            string hooksPath = Path.Combine(Path.GetDirectoryName(Info.Location), "HOOKS-Assembly-CSharp.dll");
 
-            if (File.Exists(pathOut)) 
+            if (File.Exists(hooksPath)) 
             {
-                return;
+                // if HOOKS file is older than the Assembly-Csharp file...
+                if (File.GetLastWriteTime(hooksPath) < File.GetLastWriteTime(asmPath))
+                {
+                    Logger.Log(LogLevel.Warning, "[HookGen] HOOKS file is out of date, generating a new one...");
+                    File.Delete(hooksPath);
+                }
+                else // it's up to date. do nothing.
+                {
+                    return;
+                }
             }
 
             using (MonoModder mm = new MonoModder 
             {
-                InputPath = pathIn,
-                OutputPath = pathOut,
+                InputPath = asmPath,
+                OutputPath = hooksPath,
                 PublicEverything = true,
                 DependencyDirs = new List<string>() { Paths.ManagedPath, Paths.BepInExAssemblyDirectory },
             }) 
@@ -59,119 +77,95 @@ namespace BepInExPartialityWrapper
                 mm.Read();
                 mm.MapDependencies();
                 mm.Log("[HookGen] Starting HookGenerator");
-                HookGenerator gen = new HookGenerator(mm, Path.GetFileName(pathOut));
+                HookGenerator gen = new HookGenerator(mm, Path.GetFileName(hooksPath));
                 using (ModuleDefinition mOut = gen.OutputModule) 
                 {
                     gen.HookPrivate = true;
                     gen.Generate();
-                    mOut.Write(pathOut);
+                    mOut.Write(hooksPath);
                 }
                 mm.Log("[HookGen] Done.");
             }
         }
 
-        /// <summary>Removes LoadAllMods from ModManager and initializates Partiality</summary>
-        void BootstrapPartiality()
-        {
-            var harmony = new Harmony(ID);
-
-            harmony.Patch(AccessTools.Method(typeof(ModManager), nameof(ModManager.LoadAllMods)),
-                prefix: new HarmonyMethod(typeof(Wrapper), nameof(PrefixReturnFalse)));
-
-            PartialityManager.CreateInstance();
-        }
-
-        static bool PrefixReturnFalse() => false;
-
-        /// <summary>Loads the Partiality Mods after sorting</summary>
+        /// <summary>Sorts and then loads PartialityMod types from the Plugins folder</summary>
         void LoadPartialityMods()
         {
-            var modTypes = LoadTypes<PartialityMod>(Paths.PluginPath);
+            List<PartialityMod> instances = GenerateInstances();
 
-            var loadedMods = PartialityManager.Instance.modManager.loadedMods;
-
-            //Load mods from types
-            foreach (Type t in modTypes) 
-            {
-                //Don't try to load the base class
-                if (t.Name == "PartialityMod") 
-                {
-                    continue;
-                }
-
-                try 
-                {
-                    PartialityMod newMod = (PartialityMod) Activator.CreateInstance(t);
-
-                    newMod.Init();
-
-                    if (newMod.ModID == "NULL") 
-                    {
-                        Logger.LogWarning("Mod With NULL id, assigning the file as the ID");
-                        newMod.ModID = t.Name;
-                    }
-
-                    loadedMods.Add(newMod);
-
-                    Logger.LogInfo("Initialized mod " + newMod.ModID);
-
-                } 
-                catch (Exception e) 
-                {
-                    Logger.LogError("Could not instantiate Partiality Mod of Type: " + t.Name + "\r\n" + e);
-                }
-            }
-
-            var loadedModsSorted = loadedMods.OrderBy(mod => mod.loadPriority);
-
-            foreach (var pMod in loadedModsSorted)
-            {
-                try
-                {
-                    pMod.OnLoad();
-                    pMod.OnEnable();
-
-                    Logger.LogInfo("Loaded and Enabled mod " + pMod.ModID);
-                }
-                catch (Exception e)
-                {
-                    Logger.LogError("Initialization error with mod: " + pMod.ModID + "\r\n" + e);
-                }
-            }
+            LoadAndEnableMods(instances);
         }
 
         /// <summary>
-        /// Loads a list of types from a directory containing assemblies, that derive from a base type.
+        /// Loads a list of PartialityMods from the BepInEx\plugins\ directory.
         /// </summary>
-        /// <typeparam name="T">The specfiic base type to search for.</typeparam>
-        /// <param name="directory">The directory to search for assemblies.</param>
-        /// <returns>Returns a list of found derivative types.</returns>
-        IEnumerable<Type> LoadTypes<T>(string directory)
+        /// <returns>Returns a list of instances.</returns>
+        List<PartialityMod> GenerateInstances()
         {
-            List<Type> types = new List<Type>();
-            Type pluginType = typeof(T);
+            List<PartialityMod> instances = new List<PartialityMod>();
 
-            foreach (string dll in Directory.GetFiles(Path.GetFullPath(directory), "*.dll")) 
+            foreach (string dll in Directory.GetFiles(Path.GetFullPath(Paths.PluginPath), "*.dll")) 
             {
                 try 
                 {
-                    Assembly assembly = Assembly.LoadFile(dll);
+                    Assembly assembly = Assembly.Load(File.ReadAllBytes(dll));
 
                     foreach (Type type in assembly.GetTypes()) 
                     {
-                        if (!type.IsInterface && !type.IsAbstract && type.BaseType == pluginType)
-                            types.Add(type);
+                        if (!type.IsInterface && !type.IsAbstract && type.BaseType == typeof(PartialityMod) && type.Name != "PartialityMod")
+                        {
+                            var mod = (PartialityMod)Activator.CreateInstance(type);
+                            instances.Add(mod);
+                            Logger.LogInfo("Created instance of mod: " + mod.ModID);
+                        }
                     }
                 } 
-                catch (BadImageFormatException) { } //unmanaged DLL
+                catch (BadImageFormatException) { } // unmanaged DLL
                 catch (ReflectionTypeLoadException ex) 
                 {
                     Logger.Log(LogLevel.Error, $"Could not load \"{Path.GetFileName(dll)}\" as a plugin!");
                     Logger.Log(LogLevel.Debug, TypeLoadExceptionToString(ex));
                 }
+                catch (Exception ex)
+                {
+                    Logger.Log(LogLevel.Error, $"Unhandled exception loading \"{Path.GetFileName(dll)}\"!");
+                    Logger.Log(LogLevel.Debug, ex.StackTrace);
+                }
             }
 
-            return types;
+            return instances;
+        }
+
+        void LoadAndEnableMods(List<PartialityMod> instances)
+        {
+            // Sort mods by loadPriority (lower num = higher priority)
+
+            var sorted = instances.OrderBy(mod => mod.loadPriority);
+
+            // Call Init, OnLoad and OnEnable for the sorted instances
+
+            foreach (var mod in sorted)
+            {
+                try
+                {
+                    mod.Init();
+
+                    if (mod.ModID == "NULL")
+                    {
+                        Logger.LogWarning("Mod with 'NULL' ID, assigning the Type as the ID");
+                        mod.ModID = mod.GetType().Name;
+                    }
+
+                    mod.OnLoad();
+                    mod.OnEnable();
+
+                    Logger.LogInfo("Loaded and Enabled mod " + mod.ModID);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogError("Initialization error with mod: " + mod.ModID + "\r\n" + e);
+                }
+            }
         }
 
         static string TypeLoadExceptionToString(ReflectionTypeLoadException ex)
