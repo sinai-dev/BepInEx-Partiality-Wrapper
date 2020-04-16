@@ -37,6 +37,8 @@ namespace Partiality
         const string NAME = "Partiality Wrapper";
         const string VERSION = "2.1";
 
+        public const string MODS_FOLDER = "Mods";
+
         public Wrapper()
         {
             // check the HOOKS file
@@ -104,7 +106,14 @@ namespace Partiality
         {
             List<PartialityMod> instances = new List<PartialityMod>();
 
-            foreach (string filepath in Directory.GetFiles(Paths.PluginPath, "*.dll")) 
+            var list = Directory.GetFiles(Paths.PluginPath, "*.dll").ToList();
+
+            if (Directory.Exists(MODS_FOLDER))
+            {
+                list.AddRange(Directory.GetFiles(MODS_FOLDER, "*.dll"));
+            }
+
+            foreach (string filepath in list) 
             {
                 try 
                 {
