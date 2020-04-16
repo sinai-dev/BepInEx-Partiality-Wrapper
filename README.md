@@ -9,31 +9,19 @@ This version is essentially Partiality packaged <b>as</b> a BepInEx mod. It serv
 
 The HOOKS file included with the release is the current latest one for Outward. If you're using this for a different game you will need to delete that and run the mod once to generate the hooks for your game.
 
-## Release
+## Install
+
+Installation instructions and the download link can be found here:
 
 <b>[Download Here](https://github.com/sinaioutlander/BepInEx-Partiality-Wrapper/releases)</b>
 
-## Installation
-
-Install <b>BepInEx</b>: (if you don't have it already)
-1. Download the [latest BepInEx_x64 release](https://github.com/BepInEx/BepInEx/releases).
-2. Place the zip in your game installation folder, eg. for Outward: `Outward\BepInEx.zip`.
-3. Right-click the file and choose <b>"Extract here</b>" to merge with the folder structure.
-4. Run the game once, and then close it.
-
-Install the <b>PartialityWrapper</b>:
-1. Download the <b>BepInEx-Partiality-Wrapper.zip</b> file from the [Releases](https://github.com/sinaioutlander/BepInEx-Partiality-Wrapper/releases) page.
-2. Place the zip in your game installation folder, eg. for Outward: `Outward\BepInEx-Partiality-Wrapper.zip`
-3. Right-click the file and choose <b>"Extract here</b>" to merge with the folder structure.
-4. Done, you can now add Partiality mods.
-
 ## Adding Partiality Mods
 
-Drag and drop any **Partiality** mod .dll files onto **`BepInEx\plugins`** folder.
+Partiality Mod DLL files can be placed either in the `BepInEx\plugins\` folder, or the Partiality `Mods\` folder. Both locations work fine.
 
-For Outward, some mods may use the `Outward\Mods` folder as well. Refer to the instructions of the mod for more details.
+However, no matter which folder you use, the DLL files need to be directly inside this folder (not in a sub-folder).
 
-* For example, for the Outward SideLoader, `SideLoader.dll` goes in `Outward\BepInEx\plugins`, but all SL Packs should be placed in `Outward\Mods\SideLoader\`.
+If you use the `BepInEx\plugins\` folder, just note that other non-DLL files in the mod (if any) should be placed wherever the author instructs you to, likely not in the plugins folder.
 
 ## Credits
 * <b>Ashnal</b> for the original PartialityWrapper
