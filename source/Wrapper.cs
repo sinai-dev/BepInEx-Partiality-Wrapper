@@ -97,7 +97,6 @@ namespace Partiality
         /// <summary>
         /// Loads a list of PartialityMods from the BepInEx\plugins\ or Outward\Mods\ directory.
         /// </summary>
-
         private void LoadMods()
         {
             Logger.Log(LogLevel.Message, "Loading Partiality Mods...");
@@ -108,7 +107,7 @@ namespace Partiality
                 asmPaths.AddRange(Directory.GetFiles(ModsFolder, "*.dll", SearchOption.AllDirectories));
             }
 
-            // First load assemblies without getting types to avoid referencing issues
+            // Load assemblies without getting types to avoid referencing issues
             var assemblies = new List<Assembly>();
             foreach (string filepath in asmPaths)
             {
@@ -128,36 +127,44 @@ namespace Partiality
                     Logger.Log(LogLevel.Debug, ex.StackTrace);
                 }
             }
-            // Then look for mods in loaded assemblies
+
+            // Look for mods in loaded assemblies
+            var mods = new List<PartialityMod>();
             foreach (Assembly assembly in assemblies)
             {
-                IEnumerable<PartialityMod> mods = (
+                IEnumerable<PartialityMod> modsInAssembly = (
                     from type in assembly.GetTypes()
                     where type.IsSubclassOf(typeof(PartialityMod))
                     select (PartialityMod)Activator.CreateInstance(type)
-                ).OrderBy(mod => mod.loadPriority).AsEnumerable();
+                ).AsEnumerable();
 
-                foreach (PartialityMod mod in mods)
+                foreach (var mod in modsInAssembly)
                 {
-                    if (mod.ModID == "NULL")
-                    {
-                        mod.ModID = mod.GetType().Name;
-                    }
-                    string label = $"{mod.ModID}@{mod.Version}";
+                    mods.Add(mod);
+                }
+            }
 
-                    try
-                    {
-                        mod.Init();
-                        mod.OnLoad();
-                        mod.OnEnable();
+            // Load mods in order of loadPriority
+            foreach (PartialityMod mod in mods.OrderBy(mod => mod.loadPriority))
+            {
+                if (mod.ModID == "NULL")
+                {
+                    mod.ModID = mod.GetType().Name;
+                }
+                string label = $"{mod.ModID}@{mod.Version}";
 
-                        Logger.LogInfo("Loaded and Enabled " + label);
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Log(LogLevel.Error, $"Unhandled exception loading \"{label}\"!");
-                        Logger.Log(LogLevel.Debug, e.ToString());
-                    }
+                try
+                {
+                    mod.Init();
+                    mod.OnLoad();
+                    mod.OnEnable();
+
+                    Logger.LogInfo("Loaded and Enabled " + label);
+                }
+                catch (Exception e)
+                {
+                    Logger.Log(LogLevel.Error, $"Unhandled exception loading \"{label}\"!");
+                    Logger.Log(LogLevel.Debug, e.ToString());
                 }
             }
         }
