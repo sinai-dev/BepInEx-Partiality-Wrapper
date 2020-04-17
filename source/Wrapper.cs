@@ -16,12 +16,12 @@ namespace Partiality
     [BepInPlugin(ID, NAME, VERSION)]
     public class Wrapper : BaseUnityPlugin
     {
-        const string ID = "com.sinai.PartialityWrapper";
-        const string NAME = "Partiality Wrapper";
-        const string VERSION = "2.1";
+        private const string ID = "com.sinai.PartialityWrapper";
+        private const string NAME = "Partiality Wrapper";
+        private const string VERSION = "2.1";
 
-        public string PluginFolder { get => Path.GetDirectoryName(Info.Location); }
-        public string ModsFolder { get => Path.Combine(Paths.GameRootPath, "Mods"); }
+        public string PluginFolder => Path.GetDirectoryName(Info.Location);
+        public string ModsFolder => Path.Combine(Paths.GameRootPath, "Mods");
 
         internal void Awake()
         {
@@ -161,7 +161,7 @@ namespace Partiality
             }
         }
 
-        static string TypeLoadExceptionToString(ReflectionTypeLoadException ex)
+        private static string TypeLoadExceptionToString(ReflectionTypeLoadException ex)
         {
             StringBuilder sb = new StringBuilder();
             foreach (Exception exSub in ex.LoaderExceptions) 
