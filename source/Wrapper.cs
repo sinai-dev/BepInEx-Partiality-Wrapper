@@ -97,54 +97,68 @@ namespace Partiality
         /// <summary>
         /// Loads a list of PartialityMods from the BepInEx\plugins\ or Outward\Mods\ directory.
         /// </summary>
-        /// <returns>Returns a list of instances.</returns>
 
         private void LoadMods()
         {
-            var assemblies = Directory.GetFiles(Paths.PluginPath, "*.dll").ToList();
+            Logger.Log(LogLevel.Message, "Loading Partiality Mods...");
 
+            var asmPaths = Directory.GetFiles(Paths.PluginPath, "*.dll").ToList();
             if (Directory.Exists(ModsFolder))
             {
-                assemblies.AddRange(Directory.GetFiles(ModsFolder, "*.dll"));
+                asmPaths.AddRange(Directory.GetFiles(ModsFolder, "*.dll", SearchOption.AllDirectories));
             }
 
-            foreach (string filepath in assemblies) 
+            // First load assemblies without getting types to avoid referencing issues
+            var assemblies = new List<Assembly>();
+            foreach (string filepath in asmPaths)
             {
-                try 
+                string filename = new FileInfo(filepath).Name;
+                try
                 {
-                    Assembly assembly = Assembly.Load(File.ReadAllBytes(filepath));
-
-                    IEnumerable<PartialityMod> mods = (
-                        from type in assembly.GetTypes()
-                        where type.IsSubclassOf(typeof(PartialityMod))
-                        select (PartialityMod)Activator.CreateInstance(type))
-                    .OrderBy(mod => mod.loadPriority).AsEnumerable();
-
-                    foreach (var mod in mods)
-                    {
-                        if (mod.ModID == "NULL")
-                        {
-                            Logger.LogWarning("Mod with 'NULL' ID, assigning the Type as the ID");
-                            mod.ModID = mod.GetType().Name;
-                        }
-
-                        mod.Init();
-                        mod.OnLoad();
-                        mod.OnEnable();
-
-                        Logger.LogInfo("Loaded and Enabled mod " + mod.ModID);
-                    }
-                } 
-                catch (BadImageFormatException) { } // unmanaged DLL
-                catch (ReflectionTypeLoadException ex) 
+                    assemblies.Add(Assembly.Load(File.ReadAllBytes(filepath)));
+                }
+                catch (ReflectionTypeLoadException ex)
                 {
                     Logger.Log(LogLevel.Error, $"Could not load \"{Path.GetFileName(filepath)}\" as a plugin!");
                     Logger.Log(LogLevel.Debug, TypeLoadExceptionToString(ex));
                 }
+                catch (BadImageFormatException) { } // unmanaged DLL
                 catch (Exception ex)
                 {
                     Logger.Log(LogLevel.Error, $"Unhandled exception loading \"{Path.GetFileName(filepath)}\"!");
                     Logger.Log(LogLevel.Debug, ex.StackTrace);
+                }
+            }
+            // Then look for mods in loaded assemblies
+            foreach (Assembly assembly in assemblies)
+            {
+                IEnumerable<PartialityMod> mods = (
+                    from type in assembly.GetTypes()
+                    where type.IsSubclassOf(typeof(PartialityMod))
+                    select (PartialityMod)Activator.CreateInstance(type)
+                ).OrderBy(mod => mod.loadPriority).AsEnumerable();
+
+                foreach (PartialityMod mod in mods)
+                {
+                    if (mod.ModID == "NULL")
+                    {
+                        mod.ModID = mod.GetType().Name;
+                    }
+                    string label = $"{mod.ModID}@{mod.Version}";
+
+                    try
+                    {
+                        mod.Init();
+                        mod.OnLoad();
+                        mod.OnEnable();
+
+                        Logger.LogInfo("Loaded and Enabled " + label);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Log(LogLevel.Error, $"Unhandled exception loading \"{label}\"!");
+                        Logger.Log(LogLevel.Debug, e.ToString());
+                    }
                 }
             }
         }
