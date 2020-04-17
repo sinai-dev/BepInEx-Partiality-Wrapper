@@ -128,24 +128,16 @@ namespace Partiality
                 }
             }
 
-            // Look for mods in loaded assemblies
-            var mods = new List<PartialityMod>();
-            foreach (Assembly assembly in assemblies)
-            {
-                IEnumerable<PartialityMod> modsInAssembly = (
+            // Build an ordered list of Partiality mods, and create instances of the mods.
+            var mods = (
+                from assembly in assemblies 
                     from type in assembly.GetTypes()
                     where type.IsSubclassOf(typeof(PartialityMod))
                     select (PartialityMod)Activator.CreateInstance(type)
-                ).AsEnumerable();
+            ).OrderBy(mod => mod.loadPriority);
 
-                foreach (var mod in modsInAssembly)
-                {
-                    mods.Add(mod);
-                }
-            }
-
-            // Load mods in order of loadPriority
-            foreach (PartialityMod mod in mods.OrderBy(mod => mod.loadPriority))
+            // Load and enable mods
+            foreach (PartialityMod mod in mods)
             {
                 if (mod.ModID == "NULL")
                 {
