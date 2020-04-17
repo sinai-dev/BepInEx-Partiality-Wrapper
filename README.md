@@ -17,7 +17,7 @@ Installation instructions and the download link can be found here:
 
 ## Adding Partiality Mods
 
-Partiality Mod DLL files should be placed directly in the `BepInEx\plugins\` folder.
+Partiality Mod DLL files can be placed in the `BepInEx\plugins\` folder, or the `Mods\` folder.
 
 Other non-DLL files from the mod (if any) should be placed where the author instructs you to.
 
