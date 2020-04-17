@@ -112,7 +112,6 @@ namespace Partiality
             var assemblies = new List<Assembly>();
             foreach (string filepath in asmPaths)
             {
-                string filename = new FileInfo(filepath).Name;
                 try
                 {
                     assemblies.Add(Assembly.Load(File.ReadAllBytes(filepath)));
