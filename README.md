@@ -24,6 +24,7 @@ However, no matter which folder you use, the DLL files need to be directly insid
 If you use the `BepInEx\plugins\` folder, just note that other non-DLL files in the mod (if any) should be placed wherever the author instructs you to, likely not in the plugins folder.
 
 ## Credits
+* <b>Laymain</b>, for help with this rewrite.
 * <b>Ashnal</b> for the original PartialityWrapper
 * <b>notfood</b> for the Bep 5.0 rewrite
 * <b>bbepis</b> for BepInEx
