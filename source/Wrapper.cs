@@ -11,23 +11,6 @@ using MonoMod;
 using MonoMod.RuntimeDetour.HookGen;
 using Partiality.Modloader;
 
-/*
- *  ========= BepInEx-Partiality-Wrapper =========
- *  
- *  This is essentially Partiality packaged as a BepInEx mod.
- *  It serves as a dummy reference to Partiality.dll, containing only the PartialityMod class, and the loader as a BepInEx plugin.
- *  It also includes HookGen and will regenerate hooks when it is detected that they are out of date.
- *  
- *  This version also has a slightly different way of reading the Partiality assembly files, which would allow compatibility with Reloader.
- *
- *  ~~~~~~ Credits: ~~~~~~
- *  - Zandra: for Partiality
- *  - Ashnal: wrote original BepInEx-Partiality-Wrapper
- *  - notfood: rewrote the Wrapper for BepInEx 5.0
- *  - Sinai (me): bundled Partiality into this mod, and some small changes.
- *  - Laymain: helped with this version
-*/
-
 namespace Partiality
 {
     [BepInPlugin(ID, NAME, VERSION)]
@@ -37,105 +20,119 @@ namespace Partiality
         const string NAME = "Partiality Wrapper";
         const string VERSION = "2.1";
 
-        public const string MODS_FOLDER = "Mods";
+        public string PluginFolder { get => Path.GetDirectoryName(Info.Location); }
+        public string ModsFolder { get => Path.Combine(Paths.GameRootPath, "Mods"); }
 
-        public Wrapper()
+        internal void Awake()
         {
+            // Load dependencies manually
+            LoadDependencies();
+
             // check the HOOKS file
             CheckHooks();
 
             // Read and Load PartialityMod types from the plugins folder
-            LoadPartialityMods();
+            LoadMods();
         }
 
-        /// <summary>Generates the HOOKS-Assembly-CSharp.dll file, if it needs updating.</summary>
-        void CheckHooks()
+        private void LoadDependencies()
+        {
+            IEnumerable<string> dependencies = (
+                from filepath in Directory.GetFiles(PluginFolder)
+                where filepath.EndsWith(".dll") || filepath.EndsWith(".exe")
+                select filepath
+            ).AsEnumerable();
+
+            foreach (string filepath in dependencies)
+            {
+                Logger.Log(LogLevel.Message, "Loading dependency " + Path.GetFileName(filepath));
+                Assembly.Load(File.ReadAllBytes(filepath));
+            }
+
+            Logger.Log(LogLevel.Message, "Done loading dependencies");
+        }
+
+        private void CheckHooks()
         {
             string asmPath = Path.Combine(Paths.ManagedPath, "Assembly-CSharp.dll");
-            string hooksPath = Path.Combine(Path.GetDirectoryName(Info.Location), "HOOKS-Assembly-CSharp.dll");
+            string hooksPath = Path.Combine(PluginFolder, "HOOKS-Assembly-CSharp.dll");
 
-            if (File.Exists(hooksPath)) 
+            if (File.Exists(hooksPath))
             {
                 // if HOOKS file is older than the Assembly-Csharp file...
                 if (File.GetLastWriteTime(hooksPath) < File.GetLastWriteTime(asmPath))
                 {
-                    Logger.Log(LogLevel.Warning, "[HookGen] HOOKS file is out of date, generating a new one...");
                     File.Delete(hooksPath);
                 }
-                else // it's up to date. do nothing.
+                else
                 {
                     return;
                 }
             }
 
-            using (MonoModder mm = new MonoModder 
+            Logger.Log(LogLevel.Message, "Generating new HOOKS file...");
+
+            using (var modder = new MonoModder
             {
                 InputPath = asmPath,
                 OutputPath = hooksPath,
                 PublicEverything = true,
-                DependencyDirs = new List<string>() { Paths.ManagedPath, Paths.BepInExAssemblyDirectory },
-            }) 
+                DependencyDirs = new List<string> { Paths.ManagedPath, PluginFolder }
+            })
             {
-                mm.Read();
-                mm.MapDependencies();
-                mm.Log("[HookGen] Starting HookGenerator");
-                HookGenerator gen = new HookGenerator(mm, Path.GetFileName(hooksPath));
-                using (ModuleDefinition mOut = gen.OutputModule) 
+                modder.Read();
+                modder.MapDependencies();
+                var generator = new HookGenerator(modder, Path.GetFileName(hooksPath));
+                using (ModuleDefinition module = generator.OutputModule)
                 {
-                    gen.HookPrivate = true;
-                    gen.Generate();
-                    mOut.Write(hooksPath);
+                    generator.HookPrivate = true;
+                    generator.Generate();
+                    module.Write(hooksPath);
                 }
-                mm.Log("[HookGen] Done.");
             }
-        }
 
-        /// <summary>Sorts and then loads PartialityMod types from the Plugins folder</summary>
-        void LoadPartialityMods()
-        {
-            List<PartialityMod> instances = GenerateInstances();
-
-            LoadAndEnableMods(instances);
+            Assembly.Load(File.ReadAllBytes(hooksPath));
         }
 
         /// <summary>
-        /// Loads a list of PartialityMods from the BepInEx\plugins\ directory.
+        /// Loads a list of PartialityMods from the BepInEx\plugins\ or Outward\Mods\ directory.
         /// </summary>
         /// <returns>Returns a list of instances.</returns>
-        List<PartialityMod> GenerateInstances()
+
+        private void LoadMods()
         {
-            List<PartialityMod> instances = new List<PartialityMod>();
+            var assemblies = Directory.GetFiles(Paths.PluginPath, "*.dll").ToList();
 
-            var list = Directory.GetFiles(Paths.PluginPath, "*.dll").ToList();
-
-            if (Directory.Exists(MODS_FOLDER))
+            if (Directory.Exists(ModsFolder))
             {
-                list.AddRange(Directory.GetFiles(MODS_FOLDER, "*.dll"));
+                assemblies.AddRange(Directory.GetFiles(ModsFolder, "*.dll"));
             }
 
-            foreach (string filepath in list) 
+            foreach (string filepath in assemblies) 
             {
                 try 
                 {
                     Assembly assembly = Assembly.Load(File.ReadAllBytes(filepath));
 
-                    foreach (Type type in assembly.GetTypes()
-                        .Where(x => 
-                            x.BaseType == typeof(PartialityMod) &&
-                            !x.IsInterface &&
-                            !x.IsAbstract &&
-                            x.Name != "PartialityMod")) // dont try to load the base class (although would this ever happen?)
-                    {
-                        var mod = (PartialityMod)Activator.CreateInstance(type);
+                    IEnumerable<PartialityMod> mods = (
+                        from type in assembly.GetTypes()
+                        where type.IsSubclassOf(typeof(PartialityMod))
+                        select (PartialityMod)Activator.CreateInstance(type))
+                    .OrderBy(mod => mod.loadPriority).AsEnumerable();
 
+                    foreach (var mod in mods)
+                    {
                         if (mod.ModID == "NULL")
                         {
                             Logger.LogWarning("Mod with 'NULL' ID, assigning the Type as the ID");
                             mod.ModID = mod.GetType().Name;
                         }
 
-                        instances.Add(mod);
-                        Logger.LogInfo("Created instance of mod: " + mod.ModID);
+                        mod.Init();
+                        mod.OnLoad();
+                        mod.OnEnable();
+
+                        Logger.LogInfo("Loaded and Enabled mod " + mod.ModID);
                     }
                 } 
                 catch (BadImageFormatException) { } // unmanaged DLL
@@ -148,33 +145,6 @@ namespace Partiality
                 {
                     Logger.Log(LogLevel.Error, $"Unhandled exception loading \"{Path.GetFileName(filepath)}\"!");
                     Logger.Log(LogLevel.Debug, ex.StackTrace);
-                }
-            }
-
-            return instances;
-        }
-
-        void LoadAndEnableMods(List<PartialityMod> instances)
-        {
-            // Sort mods by loadPriority (lower num = higher priority)
-
-            var sorted = instances.OrderBy(mod => mod.loadPriority);
-
-            // Call Init, OnLoad and OnEnable for the sorted instances
-
-            foreach (var mod in sorted)
-            {
-                try
-                {
-                    mod.Init();
-                    mod.OnLoad();
-                    mod.OnEnable();
-
-                    Logger.LogInfo("Loaded and Enabled mod " + mod.ModID);
-                }
-                catch (Exception e)
-                {
-                    Logger.LogError("Initialization error with mod: " + mod.ModID + "\r\n" + e);
                 }
             }
         }
