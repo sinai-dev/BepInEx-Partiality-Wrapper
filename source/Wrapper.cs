@@ -107,12 +107,13 @@ namespace Partiality
                 asmPaths.AddRange(Directory.GetFiles(ModsFolder, "*.dll", SearchOption.AllDirectories));
             }
 
-            // Load assemblies without getting types to avoid referencing issues
+            // Load assemblies
             var assemblies = new List<Assembly>();
             foreach (string filepath in asmPaths)
             {
                 try
                 {
+                    //assemblies.Add(Assembly.LoadFile(filepath));
                     assemblies.Add(Assembly.Load(File.ReadAllBytes(filepath)));
                 }
                 catch (ReflectionTypeLoadException ex)
@@ -128,13 +129,22 @@ namespace Partiality
                 }
             }
 
-            // Build an ordered list of Partiality mods, and create instances of the mods.
-            var mods = (
-                from assembly in assemblies 
-                    from type in assembly.GetTypes()
-                    where type.IsSubclassOf(typeof(PartialityMod))
-                    select (PartialityMod)Activator.CreateInstance(type)
-            ).OrderBy(mod => mod.loadPriority);
+            var mods = new List<PartialityMod>();
+            foreach (var asm in assemblies)
+            {
+                try
+                {
+                    mods.AddRange(from type in GetTypesSafe(asm)
+                                  where type.IsSubclassOf(typeof(PartialityMod))
+                                  select (PartialityMod)Activator.CreateInstance(type));
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError("Exception loading assembly: " + asm.FullName);
+                    Logger.LogDebug(ex.Message);
+                    Logger.LogDebug(ex.StackTrace);
+                }
+            }
 
             // Load and enable mods
             foreach (PartialityMod mod in mods)
@@ -159,6 +169,13 @@ namespace Partiality
                     Logger.Log(LogLevel.Debug, e.ToString());
                 }
             }
+        }
+
+        public static IEnumerable<Type> GetTypesSafe(Assembly asm)
+        {
+            try { return asm.GetTypes(); }
+            catch (ReflectionTypeLoadException e) { return e.Types.Where(x => x != null); }
+            catch { return Enumerable.Empty<Type>(); }
         }
 
         private static string TypeLoadExceptionToString(ReflectionTypeLoadException ex)
