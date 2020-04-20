@@ -39,7 +39,7 @@ namespace Partiality
         {
             IEnumerable<string> dependencies = (
                 from filepath in Directory.GetFiles(PluginFolder)
-                where filepath.EndsWith(".dll") || filepath.EndsWith(".exe")
+                where (filepath.EndsWith(".dll") || filepath.EndsWith(".exe")) && !filepath.Contains("Partiality.dll")
                 select filepath
             ).AsEnumerable();
 
