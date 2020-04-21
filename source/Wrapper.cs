@@ -32,10 +32,7 @@ namespace Partiality
             CheckHooks();
 
             // Read and Load PartialityMod types from the plugins folder
-            LoadMods();
-
-            // temp debug
-            
+            LoadMods();            
         }
 
         private void LoadDependencies()
