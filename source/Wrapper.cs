@@ -33,6 +33,9 @@ namespace Partiality
 
             // Read and Load PartialityMod types from the plugins folder
             LoadMods();
+
+            // temp debug
+            
         }
 
         private void LoadDependencies()
@@ -91,7 +94,8 @@ namespace Partiality
                 }
             }
 
-            Assembly.Load(File.ReadAllBytes(hooksPath));
+            Assembly.LoadFile(hooksPath);
+            //Assembly.Load(File.ReadAllBytes(hooksPath));
         }
 
         /// <summary>
@@ -147,7 +151,7 @@ namespace Partiality
             }
 
             // Load and enable mods
-            foreach (PartialityMod mod in mods)
+            foreach (PartialityMod mod in mods.OrderBy(mod => mod.loadPriority))
             {
                 if (mod.ModID == "NULL")
                 {
