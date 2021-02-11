@@ -7,8 +7,6 @@ A <b>BepInEx-Partiality Mod Wrapper</b> for Unity Games. This allows Partiality 
 
 This version is essentially Partiality packaged <b>as</b> a BepInEx mod. It serves as a dummy reference to Partliality.dll for Partiality Mods, but otherwise behaves as a BepInEx mod.
 
-The HOOKS file included with the release is the current latest one for Outward. If you're using this for a different game you will need to delete that and run the mod once to generate the hooks for your game.
-
 ## Install
 
 Installation instructions and the download link can be found here:

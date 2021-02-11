@@ -14,11 +14,11 @@ using Partiality.Modloader;
 namespace Partiality
 {
     [BepInPlugin(ID, NAME, VERSION)]
-    public class Wrapper : BaseUnityPlugin
+    public class PartialityWrapper : BaseUnityPlugin
     {
         private const string ID = "com.sinai.PartialityWrapper";
         private const string NAME = "Partiality Wrapper";
-        private const string VERSION = "2.1";
+        private const string VERSION = "2.2";
 
         public string PluginFolder => Path.GetDirectoryName(Info.Location);
         public string ModsFolder => Path.Combine(Paths.GameRootPath, "Mods");
@@ -37,7 +37,7 @@ namespace Partiality
 
         private void LoadDependencies()
         {
-            IEnumerable<string> dependencies = (
+            var dependencies = (
                 from filepath in Directory.GetFiles(PluginFolder)
                 where (filepath.EndsWith(".dll") || filepath.EndsWith(".exe")) && !filepath.Contains("Partiality.dll")
                 select filepath
@@ -45,11 +45,11 @@ namespace Partiality
 
             foreach (string filepath in dependencies)
             {
-                Logger.Log(LogLevel.Message, "Loading dependency " + Path.GetFileName(filepath));
+                //Logger.Log(LogLevel.Message, "Loading dependency " + Path.GetFileName(filepath));
                 Assembly.Load(File.ReadAllBytes(filepath));
             }
 
-            Logger.Log(LogLevel.Message, "Done loading dependencies");
+            //Logger.Log(LogLevel.Message, "Done loading dependencies");
         }
 
         private void CheckHooks()
@@ -120,7 +120,7 @@ namespace Partiality
                 catch (ReflectionTypeLoadException ex)
                 {
                     Logger.Log(LogLevel.Error, $"Could not load \"{Path.GetFileName(filepath)}\" as a plugin!");
-                    Logger.Log(LogLevel.Debug, TypeLoadExceptionToString(ex));
+                    Logger.Log(LogLevel.Debug, ex);
                 }
                 catch (BadImageFormatException) { } // unmanaged DLL
                 catch (Exception ex)
@@ -177,33 +177,6 @@ namespace Partiality
             try { return asm.GetTypes(); }
             catch (ReflectionTypeLoadException e) { return e.Types.Where(x => x != null); }
             catch { return Enumerable.Empty<Type>(); }
-        }
-
-        private static string TypeLoadExceptionToString(ReflectionTypeLoadException ex)
-        {
-            StringBuilder sb = new StringBuilder();
-            foreach (Exception exSub in ex.LoaderExceptions) 
-            {
-                sb.AppendLine(exSub.Message);
-                if (exSub is FileNotFoundException exFileNotFound) 
-                {
-                    if (!string.IsNullOrEmpty(exFileNotFound.FusionLog)) 
-                    {
-                        sb.AppendLine("Fusion Log:");
-                        sb.AppendLine(exFileNotFound.FusionLog);
-                    }
-                } 
-                else if (exSub is FileLoadException exLoad) 
-                {
-                    if (!string.IsNullOrEmpty(exLoad.FusionLog)) 
-                    {
-                        sb.AppendLine("Fusion Log:");
-                        sb.AppendLine(exLoad.FusionLog);
-                    }
-                }
-                sb.AppendLine();
-            }
-            return sb.ToString();
         }
     }
 }
