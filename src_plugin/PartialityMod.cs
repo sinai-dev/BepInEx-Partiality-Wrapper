@@ -17,15 +17,8 @@ namespace Partiality.Modloader
 
         public bool isEnabled;
 
-        internal void BaseInit()
-        {
-            Init();
-        }
-
-        internal void BaseLoad()
-        {
-            OnLoad();
-        }
+        internal void BaseInit() => Init();
+        internal void BaseLoad() => OnLoad();
 
         public void DisableMod()
         {

@@ -1,31 +1,36 @@
 # BepInEx-Partiality-Wrapper
 
-[![Version](https://img.shields.io/badge/BepInEx-5.0-green.svg)](https://github.com/BepInEx/BepInEx)
+[![Version](https://img.shields.io/badge/BepInEx-5.X-green.svg)](https://github.com/BepInEx/BepInEx)
 [![Version](https://img.shields.io/badge/Partiality-0.3.1-green.svg)](https://github.com/PartialityModding/Partiality)
 
-A <b>BepInEx-Partiality Mod Wrapper</b> for Unity Games. This allows Partiality mods to run in BepInEx.
-
-This version is essentially Partiality packaged <b>as</b> a BepInEx mod. It serves as a dummy reference to Partliality.dll for Partiality Mods, but otherwise behaves as a BepInEx mod.
+The **BepInEx-Partiality-Wrapper** allows Partiality mods to run in BepInEx (5.X).
 
 ## Install
 
-Installation instructions and the download link can be found here:
+Installation is pretty straight-forward:
 
-<b>[Download Here](https://github.com/sinaioutlander/BepInEx-Partiality-Wrapper/releases)</b>
+* Install [BepInEx 5.X](https://github.com/BepInEx/BepInEx/releases)
+* [Download the latest PartialityWrapper release](https://github.com/sinai-dev/BepInEx-Partiality-Wrapper/releases/latest)
+* Extract the zip file and put the contents into your Game folder, making sure you merge with the existing BepInEx folder.
+* It should look like `[game]\BepInEx\patchers\PartialityWrapper\...` and `[game]\BepInEx\plugins\PartialityWrapper\...`.
+* **Run the game once** to generate the `HOOKS` file and the `BepInEx\plugins\partiality-mods\` folder.
+* If you see the file `BepInEx\plugins\PartialityWrapper\HOOKS-Assembly-CSharp.dll` then you did it correctly.
 
 ## Adding Partiality Mods
 
-Partiality Mod DLL files can be placed in the `BepInEx\plugins\` folder, or the `Mods\` folder.
+PartialityWrapper supports two folders where you can place your Partiality mods:
 
-Other non-DLL files from the mod (if any) should be placed where the author instructs you to.
+* `[game]\BepInEx\plugins\partiality-mods\` - generated after first launch, the recommended folder to use.
+* `[game]\Mods\` - the legacy Partiality folder for mods, in case the mod **requires** this structure.
+
+Both folders allow you to place the mods inside a sub-folder.
 
 ## Credits
+Written by Sinai, with help from:
+
 * <b>Laymain</b>, for help with this rewrite.
+* <b>notfood</b> for the BepInEx 5.0 rewrite
 * <b>Ashnal</b> for the original PartialityWrapper
-* <b>notfood</b> for the Bep 5.0 rewrite
-* <b>bbepis</b> for BepInEx
-* <b>Zandra</b> for Partiality
-* <b>0x0ade</b> for MonoMod
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
