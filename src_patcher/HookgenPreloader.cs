@@ -26,7 +26,6 @@ namespace PartialityWrapper
         internal static ManualLogSource Logging = Logger.CreateLogSource(PATCHER_FOLDER);
 
         // Required property for BepInEx preloader patcher.
-        // UnityEngine.dll should be present for all games.
         public static IEnumerable<string> TargetDLLs => new[] { "Assembly-CSharp.dll" };
 
         // Required method for preloader patcher, will be used as our entry point.
