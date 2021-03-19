@@ -13,7 +13,7 @@ Installation is pretty straight-forward:
 * [Download the latest PartialityWrapper release](https://github.com/sinai-dev/BepInEx-Partiality-Wrapper/releases/latest)
 * Extract the zip file and put the contents into your Game folder, making sure you merge with the existing BepInEx folder.
 * It should look like `[game]\BepInEx\patchers\PartialityWrapper\...` and `[game]\BepInEx\plugins\PartialityWrapper\...`.
-* **Run the game once** to generate the `HOOKS` file and the `BepInEx\plugins\partiality-mods\` folder.
+* **Run the game once** to generate the necessary files and folders.
 * If you see the file `BepInEx\plugins\PartialityWrapper\HOOKS-Assembly-CSharp.dll` then you did it correctly.
 
 ## Adding Partiality Mods
