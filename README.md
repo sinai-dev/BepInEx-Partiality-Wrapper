@@ -23,7 +23,7 @@ PartialityWrapper supports two folders where you can place your Partiality mods:
 * `[game]\BepInEx\plugins\partiality-mods\` - generated after first launch, the recommended folder to use.
 * `[game]\Mods\` - the legacy Partiality folder for mods, in case the mod **requires** this structure.
 
-Both folders allow you to place the mods inside a sub-folder.
+Both folders allow you to place the mods inside sub-folder(s).
 
 ## Credits
 Written by Sinai, with help from:
