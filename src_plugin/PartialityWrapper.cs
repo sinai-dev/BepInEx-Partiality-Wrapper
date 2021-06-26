@@ -15,7 +15,7 @@ namespace PartialityWrapper
     {
         private const string ID = "com.sinai.PartialityWrapper";
         private const string NAME = "Partiality Wrapper";
-        private const string VERSION = "3.0";
+        private const string VERSION = "3.1";
 
         // Paths
         public const string PLUGIN_FOLDERNAME = "PartialityWrapper";

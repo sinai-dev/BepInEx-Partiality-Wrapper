@@ -25,12 +25,11 @@ namespace PartialityWrapper
         // Log source
         internal static ManualLogSource Logging = Logger.CreateLogSource(PATCHER_FOLDER);
 
-        // Required property for BepInEx preloader patcher.
-        public static IEnumerable<string> TargetDLLs => new[] { "Assembly-CSharp.dll" };
+        // Required members for BepInEx patcher
+        public static IEnumerable<string> TargetDLLs => new string[0];
+        public static void Patch(AssemblyDefinition _) { }
 
-        // Required method for preloader patcher, will be used as our entry point.
-        // We only have one TargetDLL so this only runs once.
-        public static void Patch(AssemblyDefinition _)
+        static HookgenPreloader()
         {
             Logging.LogMessage($"BepInEx-Partiality-Wrapper initializing HOOKS...");
 
@@ -86,6 +85,5 @@ namespace PartialityWrapper
                 Logging.LogMessage(ex);
             }
         }
-
     }
 }
